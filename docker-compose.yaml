@@ -1,0 +1,61 @@
+version: "3"
+
+networks:
+  loki:
+
+services:
+###################### LOKI ######################
+  loki:
+    #image: grafana/loki:2.9.2
+    build:
+      context: ./
+      dockerfile: ./Dockerfile-Loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - loki
+###################### PROMTAIL ######################
+  promtail:
+    #image: grafana/promtail:2.9.2
+    build:
+      context: ./
+      dockerfile: ./Dockerfile-Promtail
+    volumes:
+      - /var/log:/var/log
+      - /home/troll4hire/Documents/_python_projects_/ge_work_epfconftest/lpmrpi/logs:/lpmlogs
+      #- /home/troll4hire/Documents/_python_projects_/ge_work_epfconftest/lpmrpi/logs:/var/log/lpm
+      #- /home/troll4hire/Downloads/grafana-loki/loki/production/bullshit:/etc/promtail
+    #command: -config.file=/etc/promtail/config.yml
+    networks:
+      - loki
+###################### GRAFANA ######################
+  grafana:
+    environment:
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+    entrypoint:
+      - sh
+      - -euc
+      - |
+        mkdir -p /etc/grafana/provisioning/datasources
+        cat <<EOF > /etc/grafana/provisioning/datasources/ds.yaml
+        apiVersion: 1
+        datasources:
+        - name: Loki
+          type: loki
+          access: proxy 
+          orgId: 1
+          url: http://loki:3100
+          basicAuth: false
+          isDefault: true
+          version: 1
+          editable: false
+        EOF
+        /run.sh
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    networks:
+      - loki

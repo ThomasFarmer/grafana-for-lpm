@@ -1,0 +1,24 @@
+FROM grafana/loki:2.9.2
+
+#Add a user with userid 8877 and name nonroot
+#RUN useradd −u 8877 pi
+#Run Container as nonroot
+#USER pi
+
+WORKDIR /
+
+#COPY configs/loki/local-config.yaml /etc/loki/local-config.yaml
+
+#RUN apt update
+
+#RUN pip install -r requirements.txt
+
+#ENV TZ="America/New_York"
+#RUN date
+
+#WORKDIR /lpmlogs
+
+#LPM dashboard
+#EXPOSE 5001
+
+#CMD [ "python", "./lpmlocaldashboard.py"]
